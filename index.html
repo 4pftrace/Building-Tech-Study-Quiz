@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Exam 1 — Interactive Quiz with Embedded Images (60 Qs)</title>
+<style>
+  :root { --bg:#0b0c10; --card:#15181d; --ink:#eaf2f2; --muted:#9fb1b7; --accent:#89c2ff; --right:#1fbf75; --wrong:#ff5d73; }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.55;}
+  .wrap{max-width:980px;margin:32px auto;padding:0 16px;}
+  h1{font-size:28px;margin:0 0 6px;}
+  .sub{color:var(--muted);margin-bottom:18px}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 22px 0;}
+  .btn{background:#212631;border:1px solid #2a2f37;padding:10px 14px;border-radius:10px;color:var(--ink);cursor:pointer}
+  .btn:hover{border-color:#3b4350}
+  .pill{display:inline-block;background:#1d2330;border:1px solid #30394a;color:var(--muted);padding:6px 10px;border-radius:999px;margin-left:8px;font-size:12px}
+  .card{background:var(--card);border-radius:14px;padding:16px 16px 12px;margin:12px 0;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+  .q{font-weight:700;margin-bottom:10px}
+  .pic{margin:8px 0 10px 0; border-radius:12px; overflow:hidden; border:1px solid #2a2f37;}
+  .pic img{display:block;width:100%;height:auto;object-fit:contain; background:#0f1216;}
+  .choice{display:block;margin:8px 0;padding:10px 12px;border:1px solid #2a2f37;border-radius:10px;cursor:pointer;transition:.15s;}
+  .choice:hover{border-color:#3b4350;transform:translateY(-1px);}
+  .choice.correct{background:rgba(31,191,117,.12);border-color:var(--right);}
+  .choice.incorrect{background:rgba(255,93,115,.12);border-color:var(--wrong);}
+  .explain{color:var(--muted);margin-top:8px;display:none}
+  .sticky{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,12,16,0.95), rgba(11,12,16,0.75));backdrop-filter:blur(6px);z-index:99;padding:8px 0;margin-bottom:8px}
+  .summary{background:#12151a;border:1px dashed #2a2f37;border-radius:12px;padding:14px;margin:20px 0;color:var(--muted)}
+  .summary .big{font-size:20px;color:var(--ink);font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sticky">
+    <h1>Exam 1 — Interactive Quiz with Embedded Images</h1>
+    <div class="sub">60 questions • MC + True/False • Instant feedback & explanations • Randomized on load • Images embedded for reliable display</div>
+    <div class="controls">
+      <button class="btn" id="shuffle">🔀 Shuffle</button>
+      <button class="btn" id="reset">↩️ Reset</button>
+      <div class="pill">Score: <span class="score" id="score">0</span>/<span id="answered">0</span> • Total: <span id="total">0</span></div>
+    </div>
+  </div>
+  <div id="quiz"></div>
+  <div id="final" class="summary" style="display:none;">
+    <div class="big" id="finalText">Final Score</div>
+    <div id="tips">Tip: use Shuffle to re-order and reinforce weak topics.</div>
+  </div>
+  <div class="summary">Made for Tracy 💚 • Based on your Exam #1 study guide & lecture notes.</div>
+</div>
+<script>
+const RAW = [{"q": "Live loads are best described as:", "choices": ["Permanent building weight", "Movable/transient loads like people and furniture", "Wind pressure", "Seismic forces"], "answer": 1, "explain": "Live loads vary with occupancy; dead loads are permanent."}, {"q": "Continuous exterior insulation primarily improves:", "choices": ["Structural strength", "Thermal performance and condensation control", "Acoustic reflection", "Electrical bonding"], "answer": 1, "explain": "CI reduces thermal bridges and helps keep sheathing warm/dry."}, {"q": "CMU stands for:", "choices": ["Concrete Masonry Unit", "Composite Masonry Unit", "Calcium Masonry Unit", "Concrete Molded Unit"], "answer": 0, "explain": "CMU = Concrete Masonry Unit (concrete block)."}, {"q": "Differential settlement is:", "choices": ["Uniform downward movement", "Non-uniform movement causing distortion/cracking", "Uplift due to wind", "Thermal expansion"], "answer": 1, "explain": "Different amounts of settlement cause angular distortion."}, {"q": "T/F: Steel stud partitions can be load-bearing or non-load-bearing depending on gauge and design.", "choices": ["True", "False"], "answer": 0, "explain": "Heavier gauges with proper design can be load-bearing."}, {"q": "Lateral forces on foundations can come from:", "choices": ["Hydrostatic soil pressure", "Wind", "Seismic", "All of the above"], "answer": 3, "explain": "Soil water, wind, and seismic all impose lateral loads."}, {"q": "T/F: Mortar joints can be profiled (e.g., concave, V, flush) and affect weathering.", "choices": ["True", "False"], "answer": 0, "explain": "Joint profiles influence water shedding and durability."}, {"q": "Uniform load means:", "choices": ["Load varies along the span", "Load is zero at midspan", "Load is constant per unit length/area", "Only applies to wind"], "answer": 2, "explain": "Uniform loads are constant along a member or surface."}, {"q": "SIPs (Structural Insulated Panels) are:", "choices": ["Steel deck with concrete topping", "Foam core sandwiched between structural facings (e.g., OSB)", "CMU with rigid insulation", "Only interior acoustic panels"], "answer": 1, "explain": "SIPs combine structure + insulation in factory-made panels."}, {"q": "What construction method replaced balloon framing for most housing?", "choices": ["Heavy timber", "Platform framing", "Post-and-beam", "Masonry bearing"], "answer": 1, "explain": "Platform (Western) framing uses floor platforms between stories."}, {"q": "Slab-on-grade means:", "choices": ["Suspended concrete slab above ground", "Concrete poured into formwork directly on prepared ground with no crawlspace", "Wood platform on piers", "Precast planks on beams"], "answer": 1, "explain": "Concrete slab cast directly at grade; no space below."}, {"q": "Shear occurs when:", "choices": ["Two opposing forces act parallel to a plane", "Material is twisted only", "Only axial loads exist", "Only temperature changes occur"], "answer": 0, "explain": "Shear is sliding between adjacent planes from opposing parallel forces."}, {"q": "Tensile stress is associated with:", "choices": ["Pushing together", "Pulling apart", "Sliding layers", "Torsion only"], "answer": 1, "explain": "Tension stretches material fibers."}, {"q": "Roof shapes include all EXCEPT:", "choices": ["Gable", "Hip", "Gambrel", "Wythe"], "answer": 3, "explain": "A wythe is a masonry term, not a roof shape."}, {"q": "The primary purpose of a foundation system is to:", "choices": ["Provide aesthetics", "Transfer building loads safely to the ground", "Control interior temperature", "House electrical panels"], "answer": 1, "explain": "Foundations collect and spread loads to soil/rock within bearing capacity."}, {"q": "Ballast in roofing typically refers to:", "choices": ["Counterweight (e.g., gravel) holding down roofing membranes", "Electrical grounding", "Thermal insulation", "Acoustic damping"], "answer": 0, "explain": "Ballast weighs down loose-laid membranes (and provides UV protection)."}, {"q": "Concrete reaches design compressive strength at approximately:", "choices": ["7 days", "14 days", "21 days", "28 days"], "answer": 3, "explain": "Specified strength f'c is referenced at 28 days."}, {"q": "Basic parts of a steel stud include:", "choices": ["Web, flanges, return lips", "Chord, web, seat", "Top chord, bottom chord, web", "Stud, plate, shim"], "answer": 0, "explain": "Cold-formed C-stud geometry uses web, flanges, and small return lips."}, {"q": "A concentrated load is:", "choices": ["Evenly distributed over an area", "Applied at a point or small area", "Always a wind load", "Only in roof design"], "answer": 1, "explain": "Point/small area loads cause higher local stresses."}, {"q": "Historic traditional material widely used in older U.S. buildings:", "choices": ["Carbon fiber", "Reinforced plastics", "Stone and brick", "ETFE foil"], "answer": 2, "explain": "Historic systems relied heavily on masonry/stone."}, {"q": "Major building systems are traditionally divided into:", "choices": ["Plumbing, electrical, HVAC (and others)", "Foundations, façades, interiors only", "Only architectural finishes", "Only IT systems"], "answer": 0, "explain": "Service systems include plumbing, electrical, HVAC, etc."}, {"q": "How do windows impact interior needs?", "choices": ["Only by adding glare", "They affect daylight, views, heat gain/loss, and glare control", "They only affect acoustics", "They have no impact"], "answer": 1, "explain": "Windows influence lighting, comfort, and energy use."}, {"q": "T/F: Stability of a structure means forces are equal to zero.", "choices": ["True", "False"], "answer": 1, "explain": "Equilibrium means sums are balanced, not zero forces; the study guide flags 'forces equal to' as false."}, {"q": "A header in wood framing:", "choices": ["Is the base plate at floor", "Carries loads over an opening", "Is a roof ridge board", "Is a joist hanger"], "answer": 1, "explain": "Headers transfer loads to trimmers/kings."}, {"q": "T/F: A masonry 'bond' is the waterproof layer behind brick.", "choices": ["True", "False"], "answer": 1, "explain": "Bond is the pattern/arrangement of units tying wythes together."}, {"q": "A catenary describes the ideal shape of:", "choices": ["A beam in bending", "A freely hanging cable under its own weight", "A rigid arch under compression", "A column under buckling"], "answer": 1, "explain": "Hanging cables take the catenary shape; inverted, it is efficient for compression arches."}, {"q": "In a stucco-over-wood-stud exterior wall, which layer is the primary drainage plane?", "choices": ["Continuous insulation", "Air/water barrier (WRB)", "Gypsum sheathing", "Reinforcing mesh"], "answer": 1, "explain": "WRB manages bulk water behind the cladding."}, {"q": "Glare is best defined as:", "choices": ["Even, comfortable illumination", "Excessive brightness contrast causing visual discomfort/reduced visibility", "A reflected image of the lamp", "Any daylight"], "answer": 1, "explain": "Glare reduces visual performance; design aims to avoid it."}, {"q": "T/F: We generally want glare in workplaces.", "choices": ["True", "False"], "answer": 1, "explain": "Glare is undesirable; control with shading, surface finishes, and layout."}, {"q": "T/F: Platform framing builds one full-height wall from ground to roof without breaks.", "choices": ["True", "False"], "answer": 1, "explain": "That describes balloon framing. Platform framing stacks floor platforms story by story."}, {"q": "Windows can reduce reliance on electric lighting primarily by:", "choices": ["Increasing glare", "Providing daylight that is controlled and distributed appropriately", "Blocking all sun", "Only being small"], "answer": 1, "explain": "Daylight (with shading/controls) reduces artificial lighting loads."}, {"q": "Three common roof framing materials are:", "choices": ["Wood, steel, concrete", "Brick, wood, glass", "Bamboo, steel, CMU", "Gypsum, wood, aluminum"], "answer": 0, "explain": "Roofs can be framed with wood trusses, steel, or concrete."}, {"q": "ICF (Insulated Concrete Forms) are:", "choices": ["Factory precast concrete slabs", "Foam block forms filled with concrete to create insulated walls", "Only floor insulation panels", "Wood forms reused for slabs"], "answer": 1, "explain": "ICF uses permanent foam forms as insulation + concrete core."}, {"q": "Which is NOT a primary structural system by form?", "choices": ["Load-bearing wall", "Post-and-beam (frame)", "Shell/surface", "Electrical"], "answer": 3, "explain": "Electrical is a service system, not a structural system."}, {"q": "A cantilever is a member that:", "choices": ["Is supported at both ends", "Is simply supported midspan", "Projects beyond its support with a free end", "Can’t carry bending"], "answer": 2, "explain": "Cantilevers are fixed at one end and free at the other."}, {"q": "Four primary characteristics of a structural system include:", "choices": ["Aesthetics, color, pattern, texture", "Strength/stiffness, stability, economy, serviceability", "Fire rating, R-value, U-factor, SHGC", "Span, pitch, soffit, fascia"], "answer": 1, "explain": "From the notes: stiffness/strength, stability, economy (and serviceability)."}, {"q": "A brick laid with its long face showing along the wall length is a:", "choices": ["Header", "Soldier", "Stretcher", "Rowlock"], "answer": 2, "explain": "A stretcher shows the long face; a header shows the short end."}, {"q": "Which diagram component spans over an opening in masonry?", "choices": ["Sill", "Lintel", "Jamb", "Keyway"], "answer": 1, "explain": "Lintels support loads above openings."}, {"q": "Concrete composition typically includes:", "choices": ["Cement, sand, coarse aggregate, water (and admixtures)", "Clay, sand, water", "Gypsum, lime, sand, water", "Epoxy, fibers, paint"], "answer": 0, "explain": "Standard concrete = binder (cement), fine/coarse aggregates, water."}, {"q": "Cripple studs are used to:", "choices": ["Brace roof rafters", "Frame short segments above/below openings", "Support floor joists", "Anchor sill plates"], "answer": 1, "explain": "Cripples fill above/below windows and doors."}, {"q": "A crawlspace foundation is:", "choices": ["No space between ground and slab", "A short raised space allowing access below the floor", "A deep drilled pier", "An above-grade slab"], "answer": 1, "explain": "Crawlspaces allow access to utilities and ventilation below floors."}, {"q": "Which is a function of a lintel?", "choices": ["Ventilation", "Span over an opening to carry loads", "Waterproofing", "Decoration only"], "answer": 1, "explain": "Lintels are structural beams over openings."}, {"q": "Site considerations typically include FOUR broad categories such as:", "choices": ["Topography, climate/sun/wind, access/orientation, vegetation/water", "Wall color, furniture style, brand palette, signage size", "Only zoning", "Only parking"], "answer": 0, "explain": "These factors influence building form and interior conditions."}, {"q": "Compressive stress is associated with:", "choices": ["Pushing together", "Pulling apart", "Sliding layers", "Thermal expansion only"], "answer": 0, "explain": "Compression shortens/squeezes fibers."}, {"q": "What did your class identify as the most important aspect of construction?", "choices": ["Scheduling", "Communication", "Software selection", "Material cost"], "answer": 1, "explain": "Per the study guide, communication."}, {"q": "Which of the following is a precast concrete floor member?", "choices": ["Slab-on-grade", "Double T", "Cast-in-place flat plate", "Site strip footing"], "answer": 1, "explain": "Double T and single T are factory precast elements."}, {"q": "T/F: Fresh slabs can usually be walked on after ~24 hours, but full strength takes weeks.", "choices": ["True", "False"], "answer": 0, "explain": "Initial set allows careful foot traffic; strength gain continues."}, {"q": "What is masonry?", "choices": ["A type of foundation", "A construction method using individual units laid in mortar", "A roof system", "A glazing system"], "answer": 1, "explain": "Masonry uses bricks/blocks set in mortar to form walls."}, {"q": "In simple bending of a beam, the TOP fibers are in _____ and the BOTTOM in _____.", "choices": ["Tension; compression", "Compression; tension", "Shear; torsion", "Static; dynamic"], "answer": 1, "explain": "Top shortens (compression); bottom lengthens (tension)."}, {"q": "A pile foundation is:", "choices": ["Shallow spread footing", "Deep element driven/drilled to transfer load to deeper strata", "Only for lightweight buildings", "Same as slab-on-grade"], "answer": 1, "explain": "Piles bypass weak near-surface soils to stronger layers."}];
+let DATA = [];
+let score = 0, answered = 0;
+const quizEl = document.getElementById('quiz');
+const scoreEl = document.getElementById('score');
+const ansEl = document.getElementById('answered');
+const totalEl = document.getElementById('total');
+const finalBox = document.getElementById('final');
+const finalText = document.getElementById('finalText');
+
+function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+
+function prep(){
+  DATA = JSON.parse(JSON.stringify(RAW));
+  // Randomize on load
+  shuffleArray(DATA);
+  // Shuffle MC choices
+  DATA.forEach(item=>{
+    if(item.choices.length>2){
+      const indexed = item.choices.map((c,i)=>({c,i}));
+      shuffleArray(indexed);
+      item.choices = indexed.map(o=>o.c);
+      item.answer = indexed.findIndex(o=>o.i===item.answer);
+    }
+  });
+}
+
+function render(){
+  quizEl.innerHTML='';
+  totalEl.textContent = DATA.length;
+  score=0; answered=0;
+  scoreEl.textContent=0; ansEl.textContent=0;
+  finalBox.style.display='none';
+  DATA.forEach((item, idx)=>{
+    const card = document.createElement('div');
+    card.className='card';
+    const q = document.createElement('div'); q.className='q'; q.textContent=(idx+1)+'. '+item.q; card.appendChild(q);
+    if(item.image) {
+      const pic = document.createElement('div'); pic.className='pic';
+      const img = document.createElement('img'); img.src = item.image; img.alt="question image";
+      pic.appendChild(img); card.appendChild(pic);
+    }
+    item.choices.forEach((c,ci)=>{
+      const ch=document.createElement('div'); ch.className='choice'; ch.textContent=(item.choices.length===2?['T','F'][ci]:String.fromCharCode(65+ci))+'. '+c;
+      ch.addEventListener('click', ()=>{
+        if(ch.classList.contains('correct')||ch.classList.contains('incorrect')) return;
+        const already = card.querySelectorAll('.choice.correct, .choice.incorrect').length>0;
+        if(ci===item.answer){ ch.classList.add('correct'); if(!already){score++; answered++;}}
+        else{ ch.classList.add('incorrect'); const all=card.querySelectorAll('.choice'); all[item.answer].classList.add('correct'); if(!already){answered++;}}
+        const ex=card.querySelector('.explain'); if(ex){ex.style.display='block';}
+        scoreEl.textContent=score; ansEl.textContent=answered;
+        if(answered===DATA.length){ showFinal(); }
+      });
+      card.appendChild(ch);
+    });
+    const ex=document.createElement('div'); ex.className='explain'; ex.textContent='Why: '+(item.explain||''); card.appendChild(ex);
+    quizEl.appendChild(card);
+  });
+}
+
+function showFinal(){
+  const pct = Math.round((score/ DATA.length)*100);
+  finalText.textContent = `Final Score: ${score}/${DATA.length} = ${pct}%`;
+  finalBox.style.display='block';
+}
+
+document.getElementById('shuffle').addEventListener('click', ()=>{ prep(); render(); });
+document.getElementById('reset').addEventListener('click', ()=>{ render(); });
+prep(); render();
+</script>
+</body>
+</html>
