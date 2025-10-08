@@ -1,5 +1,6 @@
 # Rebuild the quiz with images embedded as base64 (so they always display).
 import os, base64, json, random
+from pathlib import Path
 
 # Paths to embed
 image_paths = [
@@ -252,8 +253,8 @@ prep(); render();
 </html>
 """
 
-out_path = "/mnt/data/Exam1_Interactive_Quiz_with_Embedded_Images.html"
+out_path = Path(__file__).resolve().parent / "index.html"
 with open(out_path, "w", encoding="utf-8") as f:
     f.write(html)
 
-out_path
+print(out_path)
